@@ -131,3 +131,9 @@ def get_user_or_app_from_context(context):
 def requestor_is_superuser(requestor):
     """Return True if requestor is superuser."""
     return getattr(requestor, "is_superuser", False)
+
+def get_products_by_user_currency(qs, context):
+    if len(qs.filter(currency=context.currency))>0:
+        return qs.filter(currency=context.currency)
+    else:
+        return qs.filter(currency="USD")

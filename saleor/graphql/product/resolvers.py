@@ -2,7 +2,7 @@ from django.db.models import Sum
 
 from ...order import OrderStatus
 from ...product import models
-from ..utils import get_database_id, get_user_or_app_from_context
+from ..utils import get_database_id, get_user_or_app_from_context,get_products_by_user_currency
 from ..utils.filters import filter_by_period
 from .filters import filter_products_by_stock_availability
 
@@ -54,7 +54,7 @@ def resolve_products(info, stock_availability=None, **_kwargs):
 
     if not qs.user_has_access_to_all(user):
         qs = qs.exclude(visible_in_listings=False)
-
+    qs = get_products_by_user_currency(qs,info.context)
     return qs.distinct()
 
 
