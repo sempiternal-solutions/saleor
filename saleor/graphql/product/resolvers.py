@@ -54,7 +54,8 @@ def resolve_products(info, stock_availability=None, **_kwargs):
 
     if not qs.user_has_access_to_all(user):
         qs = qs.exclude(visible_in_listings=False)
-    qs = get_products_by_user_currency(qs,info.context)
+    if not user.is_staff:
+        qs = get_products_by_user_currency(qs,info.context)
     return qs.distinct()
 
 
