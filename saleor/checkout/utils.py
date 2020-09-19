@@ -1,6 +1,7 @@
 """Checkout-related utility functions."""
 from typing import Iterable, List, Optional, Tuple
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Max, Min, Sum
 from django.utils import timezone
@@ -543,3 +544,10 @@ def clean_checkout(
 
 def cancel_active_payments(checkout: Checkout):
     checkout.payments.filter(is_active=True).update(is_active=False)
+
+def get_currency(userCurrency,availableCurrency,defaultCurrency):
+        checkoutCurrency = defaultCurrency
+        for currency in availableCurrency:
+            if currency == userCurrency:
+                checkoutCurrency = currency
+        return checkoutCurrency

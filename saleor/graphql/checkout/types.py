@@ -1,8 +1,9 @@
 import graphene
 from promise import Promise
 
+from django.conf import settings
 from ...checkout import calculations, models
-from ...checkout.utils import get_valid_shipping_methods_for_checkout
+from ...checkout.utils import get_valid_shipping_methods_for_checkout,get_currency
 from ...core.exceptions import PermissionDenied
 from ...core.permissions import AccountPermissions, CheckoutPermissions
 from ...core.taxes import display_gross_prices, zero_taxed_money
@@ -163,13 +164,14 @@ class Checkout(CountableDjangoObjectType):
     def resolve_total_price(root: models.Checkout, info):
         def calculate_total_price(data):
             lines, discounts = data
+            root.currency = get_currency(info.context.currency,settings.AVAILABLE_CURRENCIES,settings.DEFAULT_CURRENCY)
             taxed_total = (
                 calculations.checkout_total(
                     checkout=root, lines=lines, discounts=discounts
                 )
                 - root.get_total_gift_cards_balance()
             )
-            return max(taxed_total, zero_taxed_money())
+            return max(taxed_total, zero_taxed_money(root.currency))
 
         lines = CheckoutLinesByCheckoutTokenLoader(info.context).load(root.token)
         discounts = DiscountsByDateTimeLoader(info.context).load(

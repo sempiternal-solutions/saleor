@@ -18,6 +18,7 @@ from ...checkout.utils import (
     get_valid_shipping_methods_for_checkout,
     recalculate_checkout_discount,
     remove_promo_code_from_checkout,
+    get_currency
 )
 from ...core import analytics
 from ...core.exceptions import InsufficientStock, PermissionDenied, ProductNotPublished
@@ -331,7 +332,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
             checkout = models.Checkout(user=user)
         else:
             checkout = models.Checkout()
-
+        checkout.currency = get_currency(info.context.currency, settings.AVAILABLE_CURRENCIES, settings.DEFAULT_CURRENCY)
         cleaned_input = cls.clean_input(info, checkout, data.get("input"))
         checkout = cls.construct_instance(checkout, cleaned_input)
         cls.clean_instance(info, checkout)
