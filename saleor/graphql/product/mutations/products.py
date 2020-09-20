@@ -517,6 +517,7 @@ class ProductInput(graphene.InputObjectType):
     is_published = graphene.Boolean(
         description="Determines if product is visible to customers."
     )
+    currency = graphene.String(description="currency.")
     name = graphene.String(description="Product name.")
     slug = graphene.String(description="Product slug.")
     tax_code = graphene.String(description="Tax rate for enabled tax gateway.")
@@ -964,12 +965,13 @@ class ProductCreate(ModelMutation):
             )
             sku = cleaned_input.get("sku")
             variant_price = cleaned_input.get("base_price")
-
+            currency = cleaned_input.get("currency")
             variant = models.ProductVariant.objects.create(
                 product=instance,
                 track_inventory=track_inventory,
                 sku=sku,
                 price_amount=variant_price,
+                currency = currency
             )
             stocks = cleaned_input.get("stocks")
             if stocks:
@@ -1047,6 +1049,9 @@ class ProductUpdate(ProductCreate):
             if "base_price" in cleaned_input:
                 variant.price_amount = cleaned_input["base_price"]
                 update_fields.append("price_amount")
+            if "currency" in cleaned_input:
+                variant.currency = cleaned_input["currency"]
+                update_fields.append("currency")    
             if update_fields:
                 variant.save(update_fields=update_fields)
         # Recalculate the "minimal variant price"
